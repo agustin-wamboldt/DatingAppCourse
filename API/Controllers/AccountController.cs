@@ -5,6 +5,7 @@ using API.Interfaces;
 using API.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
@@ -45,7 +46,9 @@ namespace API.Controllers
         [HttpPost("login")]
         public async Task<ActionResult<UserDTO>> Login(LoginDTO loginDTO)
         {
-            var user = await _context.Users.SingleOrDefaultAsync(x => x.UserName == loginDTO.Username);
+            var user = await _context.Users
+                .Include(p => p.Photos)
+                .SingleOrDefaultAsync(x => x.UserName == loginDTO.Username);
 
             if (user == null) return Unauthorized("Invalid username");
 
@@ -57,7 +60,12 @@ namespace API.Controllers
                 if (computedHash[i] != user.PasswordHash[i]) { return Unauthorized("Invalid password"); }
             }
 
-            return new UserDTO { UserName = user.UserName, Token = _tokenService.CreateToken(user) };
+            return new UserDTO 
+            { 
+                UserName = user.UserName, 
+                Token = _tokenService.CreateToken(user), 
+                PhotoUrl = user.Photos.FirstOrDefault(x => x.IsMain)?.Url
+            };
         }
 
         #region Helper Methods
