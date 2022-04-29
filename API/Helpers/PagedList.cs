@@ -8,6 +8,7 @@ namespace API.Helpers
 {
     public class PagedList<T> : List<T>
     {
+        // Could be moved to Infrastructure|Controllers/Pagination
         public PagedList(IEnumerable<T> items, int count, int pageNumber, int pageSize)
         {
             CurrentPage = pageNumber;
