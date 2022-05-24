@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { AccountService } from '../_services/account.service';
 
@@ -23,8 +23,16 @@ export class RegisterComponent implements OnInit {
     this.registerForm = new FormGroup({
       username: new FormControl('', Validators.required),
       password: new FormControl('', [Validators.required, Validators.minLength(4), Validators.maxLength(30)]),
-      confirmPassword: new FormControl('', Validators.required), // Requires custom validator to check against password field
+      confirmPassword: new FormControl('', [Validators.required, this.matchValues('password')]), // Requires custom validator to check against password field
     })
+  }
+  
+  matchValues(matchTo: string): ValidatorFn {
+    return (control: AbstractControl) => {
+      return control?.value === control?.parent?.get(matchTo)!.value ? null : { isMatching: true };
+      // Compares the control's value this validator has been attached to, to the control named with the value of matchTo
+      // ie. compares confirmPassword value to, when setup, the password FormControl value.
+    }
   }
   
   register() {
