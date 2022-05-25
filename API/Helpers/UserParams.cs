@@ -2,10 +2,9 @@
 {
     public class UserParams
     {
-        // Could be moved to a Models folder.
         private const int MaxPageSize = 50;
         public int PageNumber { get; set; } = 1;
-        private int _pageSize = 20;
+        private int _pageSize = 10;
 
         public int PageSize
         {
