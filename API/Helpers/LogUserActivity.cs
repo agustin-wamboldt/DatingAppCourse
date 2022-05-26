@@ -17,9 +17,9 @@ namespace API.Helpers
 
             if (!resultContext.HttpContext.User.Identity.IsAuthenticated) return;
 
-            var username = resultContext.HttpContext.User.GetUsername();
+            var userId = resultContext.HttpContext.User.GetUserId();
             var repo = resultContext.HttpContext.RequestServices.GetService<IUserRepository>(); // Service Locator Pattern 
-            var user = await repo.GetUserByUsernameAsync(username); // Not performant since it loads photos too.
+            var user = await repo.GetUserByIdAsync(userId);
             user.LastActive = DateTime.Now;
             await repo.SaveAllAsync();
         }
