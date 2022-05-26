@@ -12,7 +12,7 @@ namespace API.Entities
         public byte[] PasswordSalt { get; set; }
         public DateTime DateOfBirth { get; set; }
         public string KnownAs { get; set; }
-        public DateTime Created { get; set; } = DateTime.Now;
+        public DateTime Create { get; set; } = DateTime.Now; // Should be Created, but for convenience (not migrating the DB and reseeding again) will be left as is
         public DateTime LastActive { get; set; } = DateTime.Now;
         public string Gender { get; set; }
         public string Introduction { get; set; }
