@@ -32,13 +32,18 @@ export class MembersService {
     return this.getPaginatedResult<Member[]>(this.baseUrl + 'users', params)
       .pipe(map(response => {
         this.memberCache.set(Object.values(userParams).join('-'), response);
-        return response;
+        return response; // The way our cache works right now we're saving lots of duplicated members since there's no validation when adding them.
     }))
   }
   
   getMember(username: string) {
-    const member = this.members.find(x => x.userName === username);
-    if (member !== undefined) return of(member);
+    const member = [...this.memberCache.values()]
+      .reduce((arr, elem) => arr.concat(elem.result), [])
+      .find((member: Member) => member.userName === username);
+    
+    if (member) {
+      return of(member);
+    }
     
     return this.http.get<Member>(this.baseUrl + 'users/' + username);
   }
