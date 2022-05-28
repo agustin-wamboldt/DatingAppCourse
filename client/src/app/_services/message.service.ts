@@ -17,4 +17,8 @@ export class MessageService {
     params = params.append('Container', container);
     return getPaginatedResult<Message[]>(this.baseUrl + 'messages', params, this.http);
   }
+  
+  getMessageThread(username: string) {
+    return this.http.get<Message[]>(this.baseUrl + 'messages/thread/' + username); // TODO: We could add pagination to this as well, but I'd rather continue with the rest of the app.
+  }
 }
