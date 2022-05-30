@@ -21,4 +21,8 @@ export class MessageService {
   getMessageThread(username: string) {
     return this.http.get<Message[]>(this.baseUrl + 'messages/thread/' + username); // TODO: We could add pagination to this as well, but I'd rather continue with the rest of the app.
   }
+  
+  sendMessage(username: string, content: string) {
+    return this.http.post<Message>(this.baseUrl + 'messages', {recipientUsername: username, content})
+  }
 }
