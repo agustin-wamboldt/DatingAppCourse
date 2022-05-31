@@ -1,4 +1,5 @@
 ﻿using API.Entities;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Text.Json;
@@ -8,21 +9,20 @@ namespace API.Data
 {
     public class Seed
     {
-        public static async Task SeedUsers(DataContext context)
+        public static async Task SeedUsers(UserManager<AppUser> userManager)
         {
-            if (await context.Users.AnyAsync()) return;
+            if (await userManager.Users.AnyAsync()) return;
 
             var userData = await System.IO.File.ReadAllTextAsync("Data/UserSeedData.json");
             var users = JsonSerializer.Deserialize<List<AppUser>>(userData);
+            if (users == null) return;
 
             foreach(var user in users)
             {
                 user.UserName = user.UserName.ToLower();
 
-                context.Users.Add(user); // Not pushed to the DB yet, only tracked the user in EF.
+                await userManager.CreateAsync(user, "Pa$$w0rd"); // UserManager takes care of saving changes to DB.
             }
-
-            await context.SaveChangesAsync();
         }
     }
 }
