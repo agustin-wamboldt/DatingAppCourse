@@ -38,7 +38,17 @@ namespace API.Controllers
 
             if (!result.Succeeded) return BadRequest(result.Errors);
 
-            return new UserDTO { UserName = user.UserName, Token = _tokenService.CreateToken(user), KnownAs = user.KnownAs, Gender = user.Gender };
+            var roleResult = await _userManager.AddToRoleAsync(user, "Member");
+
+            if (!roleResult.Succeeded) return BadRequest(result.Errors);
+
+            return new UserDTO 
+            { 
+                UserName = user.UserName, 
+                Token = await _tokenService.CreateToken(user), 
+                KnownAs = user.KnownAs, 
+                Gender = user.Gender 
+            };
         }
 
         [HttpPost("login")]
@@ -57,7 +67,7 @@ namespace API.Controllers
             return new UserDTO
             {
                 UserName = user.UserName,
-                Token = _tokenService.CreateToken(user),
+                Token = await _tokenService.CreateToken(user),
                 PhotoUrl = user.Photos.FirstOrDefault(x => x.IsMain)?.Url,
                 KnownAs = user.KnownAs,
                 Gender = user.Gender
