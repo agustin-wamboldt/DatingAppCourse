@@ -47,7 +47,7 @@ namespace API
             app.UseRouting();
 
             // The right place to add CORS.
-            app.UseCors(policy => policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("https://localhost:4200"));
+            app.UseCors(policy => policy.AllowAnyHeader().AllowAnyMethod().AllowCredentials().WithOrigins("https://localhost:4200"));
 
             app.UseAuthentication(); // Order matters, UseAuthentication first, UseAuthorization second
             app.UseAuthorization();
