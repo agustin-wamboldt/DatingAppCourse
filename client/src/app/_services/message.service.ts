@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { HubConnection, HubConnectionBuilder } from '@microsoft/signalr';
 import { BehaviorSubject } from 'rxjs';
+import { take } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { Message } from '../_models/message';
 import { User } from '../_models/user';
@@ -27,11 +28,17 @@ export class MessageService {
       .withAutomaticReconnect()
       .build();
     
-    this.hubConnection.start().catch(error => console.log());
+    this.hubConnection.start().catch(error => console.log(error));
     
     this.hubConnection.on("ReceiveMessageThread", messages => {
       this.messageThreadSource.next(messages);
     });
+    
+    this.hubConnection.on("NewMessage", message => {
+      this.messageThread$.pipe(take(1)).subscribe(messages => {
+        this.messageThreadSource.next([...messages, message]) // Created a new array so as to not mutate state of the array already inside the BehaviorSubject (which would be dangerous)
+      })
+    })
   }
 
   stopHubConnection() {
@@ -50,8 +57,9 @@ export class MessageService {
     return this.http.get<Message[]>(this.baseUrl + 'messages/thread/' + username); // TODO: We could add pagination to this as well, but I'd rather continue with the rest of the app.
   }
 
-  sendMessage(username: string, content: string) {
-    return this.http.post<Message>(this.baseUrl + 'messages', {recipientUsername: username, content})
+  async sendMessage(username: string, content: string) { // Guaranteed to return a promise
+    return this.hubConnection.invoke("SendMessage", { recipientUsername: username, content })
+      .catch(error => console.log(error));
   }
 
   deleteMessage(id: number) {
