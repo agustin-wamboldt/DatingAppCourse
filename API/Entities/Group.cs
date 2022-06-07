@@ -7,10 +7,9 @@ namespace API.Entities
     {
         public Group() { }
 
-        public Group(string name, ICollection<Connection> connections)
+        public Group(string name)
         {
             Name = name;
-            Connections = connections;
         }
 
         [Key]
