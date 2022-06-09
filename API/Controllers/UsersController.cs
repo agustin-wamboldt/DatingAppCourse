@@ -94,7 +94,7 @@ namespace API.Controllers
         [HttpPut("set-main-photo/{photoId}")]
         public async Task<ActionResult> SetMainPhoto(int photoId)
         {
-            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            var user = await _unitOfWork.UserRepository.GetUserByPhotoIdAsync(photoId);
 
             var photo = user.Photos.FirstOrDefault(x => x.Id == photoId);
 
@@ -114,9 +114,7 @@ namespace API.Controllers
         [HttpDelete("delete-photo/{photoId}")]
         public async Task<ActionResult> DeletePhoto(int photoId)
         {
-            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-
-            var photo = user.Photos.FirstOrDefault(x => x.Id == photoId);
+            var photo = await _unitOfWork.PhotoRepository.GetPhotoById(photoId);
 
             if (photo == null) return NotFound();
 
@@ -128,8 +126,7 @@ namespace API.Controllers
                 if (deletionResult.Error != null) return BadRequest(deletionResult.Error.Message);
             }
 
-            user.Photos.Remove(photo); // Adds the tracking flag for EF.
-
+            _unitOfWork.PhotoRepository.RemovePhoto(photo);
             if (await _unitOfWork.Complete()) return Ok();
 
             return BadRequest("Failed to delete the photo");
