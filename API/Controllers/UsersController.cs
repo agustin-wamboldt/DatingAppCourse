@@ -48,7 +48,8 @@ namespace API.Controllers
         [HttpGet("{username}", Name = "GetUser")]
         public async Task<ActionResult<MemberDTO>> GetUser(string username)
         {
-            return await _unitOfWork.UserRepository.GetMemberAsync(username);
+            string currentUsername = User.GetUsername();
+            return await _unitOfWork.UserRepository.GetMemberAsync(username, currentUsername);
         }
 
         [HttpPut]
@@ -77,13 +78,8 @@ namespace API.Controllers
             var photo = new Photo
             {
                 Url = result.SecureUrl.AbsoluteUri,
-                PublicId = result.PublicId
+                PublicId = result.PublicId,
             };
-
-            if (user.Photos.Count == 0)
-            {
-                photo.IsMain = true;
-            }
 
             user.Photos.Add(photo);
 
@@ -103,6 +99,8 @@ namespace API.Controllers
             var photo = user.Photos.FirstOrDefault(x => x.Id == photoId);
 
             if (photo.IsMain) return BadRequest("This is already your main photo");
+
+            if (!photo.IsApproved) return BadRequest("This photo has not been approved yet.");
 
             var currentMain = user.Photos.FirstOrDefault(x => x.IsMain);
             if (currentMain != null) currentMain.IsMain = false;

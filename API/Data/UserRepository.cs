@@ -23,12 +23,16 @@ namespace API.Data
             this._mapper = mapper;
         }
 
-        public async  Task<MemberDTO> GetMemberAsync(string username)
+        public async  Task<MemberDTO> GetMemberAsync(string username, string currentUsername) // Could refactor to use bool 'self', etc.
         {
-            return await _context.Users
+            var member = _context.Users
                 .Where(x => x.UserName == username)
-                .ProjectTo<MemberDTO>(_mapper.ConfigurationProvider)
-                .SingleOrDefaultAsync();
+                .ProjectTo<MemberDTO>(_mapper.ConfigurationProvider);
+
+            if (username == currentUsername)
+                member = member.IgnoreQueryFilters(); // Ignore approved photos filter
+
+            return await member.SingleOrDefaultAsync();
         } // Include is not needed anymore since we're using projection; EF will work out the correct query to join the table and get what we need from the DB
 
         public async Task<PagedList<MemberDTO>> GetMembersAsync(UserParams userParams)
@@ -63,6 +67,16 @@ namespace API.Data
             return await _context.Users
                 .Include(p => p.Photos)
                 .SingleOrDefaultAsync(x => x.UserName == username);
+        }
+
+        // Photos have AppUserId, but the GetUserById method doesn't include photos, and it's being used in logs so modifying it would
+        // bog the query when logging... Requires design overhaul.
+        public async Task<AppUser> GetUserByPhotoIdAsync(int photoId)
+        {
+            return await _context.Users
+                .IgnoreQueryFilters()
+                .Include(p => p.Photos)
+                .SingleOrDefaultAsync(u => u.Photos.Any(p => p.Id == photoId));
         }
 
         public async Task<string> GetUserGender(string username)

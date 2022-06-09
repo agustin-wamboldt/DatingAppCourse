@@ -11,5 +11,6 @@ namespace API.Entities
         public string PublicId { get; set; }
         public AppUser AppUser { get; set; } // Fully defined relationship between AppUser and the Photos (many to one)
         public int AppUserId { get; set; }
+        public bool IsApproved { get; set; } = false;
     }
 }
