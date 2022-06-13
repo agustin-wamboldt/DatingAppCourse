@@ -8,8 +8,8 @@ namespace API.Entities
     {
         public DateTime DateOfBirth { get; set; }
         public string KnownAs { get; set; }
-        public DateTime Create { get; set; } = DateTime.Now; // Should be Created, but for convenience (not migrating the DB and reseeding again) will be left as is
-        public DateTime LastActive { get; set; } = DateTime.Now;
+        public DateTime Create { get; set; } = DateTime.UtcNow; // Should be Created, but for convenience (not migrating the DB and reseeding again) will be left as is
+        public DateTime LastActive { get; set; } = DateTime.UtcNow;
         public string Gender { get; set; }
         public string Introduction { get; set; }
         public string LookingFor { get; set; }

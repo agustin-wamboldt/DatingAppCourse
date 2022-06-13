@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Threading.Tasks;
+using System;
 
 namespace API.Controllers
 {
@@ -20,14 +21,15 @@ namespace API.Controllers
         public AccountController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, ITokenService tokenService, IMapper mapper)
         {
             _mapper = mapper;
-            this._userManager = userManager;
-            this._signInManager = signInManager;
+            _userManager = userManager;
+            _signInManager = signInManager;
             _tokenService = tokenService;
         }
 
         [HttpPost("register")]
         public async Task<ActionResult<UserDTO>> Register(RegisterDTO registerDTO)
         {
+            registerDTO.Username = registerDTO.Username.ToLower();
             if (await UserExists(registerDTO.Username)) { return BadRequest("Username is taken"); }
 
             var user = _mapper.Map<AppUser>(registerDTO);
@@ -42,8 +44,8 @@ namespace API.Controllers
 
             if (!roleResult.Succeeded) return BadRequest(result.Errors);
 
-            return new UserDTO 
-            { 
+            return new UserDTO
+            {
                 UserName = user.UserName, 
                 Token = await _tokenService.CreateToken(user), 
                 KnownAs = user.KnownAs, 

@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { AbstractControl, FormBuilder, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormControl, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { AccountService } from '../_services/account.service';
@@ -31,7 +31,7 @@ export class RegisterComponent implements OnInit {
       dateOfBirth: ['', Validators.required],
       city: ['', Validators.required],
       country: ['', Validators.required],
-      password: ['', [Validators.required, Validators.minLength(4), Validators.maxLength(30)]],
+      password: ['', [Validators.required, Validators.minLength(4), Validators.maxLength(30), this.checkPasswordStrength()]],
       confirmPassword: ['', [Validators.required, this.matchValues('password')]], // Requires custom validator to check against password field
     })
   }
@@ -41,6 +41,20 @@ export class RegisterComponent implements OnInit {
       return control?.value === control?.parent?.get(matchTo)!.value ? null : { isMatching: true };
       // Compares the control's value this validator has been attached to, to the control named with the value of matchTo
       // ie. compares confirmPassword value to, when setup, the password FormControl value.
+    }
+  }
+  
+  checkPasswordStrength(): ValidatorFn { 
+    return (control: AbstractControl) => {
+      let hasNumber = /\d/.test(control.value);
+      let hasUpper = /[A-Z]/.test(control.value);
+      let hasLower = /[a-z]/.test(control.value);
+      let hasSymbol = /[$-/:-?{-~!"^_`\[\]]/.test(control.value)
+      const valid = hasNumber && hasUpper && hasLower && hasSymbol;
+        if (!valid) {
+            return { number: !hasNumber, uppercase: !hasUpper, lowercase: !hasLower, symbol: !hasSymbol };
+        }
+      return null;
     }
   }
   
