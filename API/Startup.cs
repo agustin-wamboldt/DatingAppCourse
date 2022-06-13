@@ -33,12 +33,12 @@ namespace API
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            if (env.IsDevelopment())
-            {
-                //app.UseDeveloperExceptionPage();  // Removed since we'll be using our custom middleware for handling expections.
-                app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "API v1"));
-            }
+            //if (env.IsDevelopment())
+            //{
+            //    //app.UseDeveloperExceptionPage();  // Removed since we'll be using our custom middleware for handling expections.
+            //    app.UseSwagger();
+            //    app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "API v1"));
+            //}
 
             app.UseMiddleware<ExceptionMiddleware>();
 
@@ -51,6 +51,9 @@ namespace API
 
             app.UseAuthentication(); // Order matters, UseAuthentication first, UseAuthorization second
             app.UseAuthorization();
+
+            app.UseDefaultFiles(); // If index.html exists, use it and serve it
+            app.UseStaticFiles();
 
             app.UseEndpoints(endpoints =>
             {
