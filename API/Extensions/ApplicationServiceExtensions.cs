@@ -8,6 +8,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Net.Http.Headers;
 using Microsoft.OpenApi.Models;
+using System;
 
 namespace API.Extensions
 {
@@ -39,7 +40,32 @@ namespace API.Extensions
 
             services.AddDbContext<DataContext>(options =>
             {
-                options.UseNpgsql(config.GetConnectionString("DefaultConnection"));
+                var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+                string connStr;
+
+                if(env == "Development")
+                {
+                    connStr = config.GetConnectionString("DefaultConnection"); // Use conString from file
+                }
+                else
+                {
+                    // Use connection string provided at runtime by Heroku
+                    var connUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+
+                    connUrl = connUrl.Replace("postgres://", string.Empty);
+                    var pgUserPass = connUrl.Split("@")[0];
+                    var pgHostPortDb = connUrl.Split("@")[1];
+                    var pgHostPort = pgHostPortDb.Split("/")[0];
+                    var pgDb = pgHostPortDb.Split("/")[1];
+                    var pgUser = pgUserPass.Split(":")[0];
+                    var pgPass = pgUserPass.Split(":")[1];
+                    var pgHost = pgHostPort.Split(":")[0];
+                    var pgPort = pgHostPort.Split(":")[1];
+
+                    connStr = $"Server={pgHost};Port={pgPort};User Id={pgUser};Password={pgPass};Database={pgDb}";
+                }
+
+                options.UseNpgsql(connStr);
             });
 
             return services;
